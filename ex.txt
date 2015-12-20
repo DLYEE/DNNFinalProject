@@ -1,0 +1,4 @@
+img_id	q_id	choices
+000042	0000421	(A)badger  (B)microsoftcom  (C)lovenox  (D)conrail  (E)red  
+000073	0000731	(A)white  (B)blue  (C)black  (D)purple  (E)nuggets  
+000042	0000422	(A)nutcracker  (B)white  (C)ace's  (D)departure  (E)written
