@@ -8,12 +8,12 @@ def read_questions(file):
             #question_info[0]: img_id
             #question_info[1]: q_id
             #question_info[2]: question
-            question_info  = shlex.split(line)
+            question_info  = shlex.split(line, posix=False)
             #ignore the first line of the file
             if question_info[0].isdigit():
-                question_list[question_info[1]] = [find_question_type(question_info[2]), question_info[2] ]
-                print question_list[question_info[1]]
                 #save the question type index and the question in the question_list, which is a dictionary
+                #question_info[2][1:-1] => avoid double quotes 
+                question_list[question_info[1]] = [find_question_type(question_info[2]), question_info[2][1:-1] ]
     return question_list
 
 def read_choices(file):
@@ -23,7 +23,7 @@ def read_choices(file):
             #choice_info[0]: img_id
             #choice_info[1]: q_id
             #choice_info[>1]: choices
-            choice_info = shlex.split(line, posix=False)
+            choice_info = shlex.split(line)
             #ignore the first line of the file
             if choice_info[0].isdigit():
                 #record the choices and save into the choice_list
@@ -31,10 +31,22 @@ def read_choices(file):
                 #choices[0] for A, choices[1] for B.....
                 #ex: choices[0] = "(A)....", choices[1] = "(B)...."
                 for i in range(2,len(choice_info)):
-                    choices.append(choice_info[i])
+                    #ignore (A), (B)...
+                    choices.append(choice_info[i][3:])
                 choice_list[choice_info[1]] = choices
+                print choice_list[choice_info[1]]
 
     return choice_list
+
+def read_answers(file):
+    answer_list = {}
+    with open(file, 'r+') as answer_file:
+        for line in answer_file:
+            answer_info = shlex.split(line, posix=False)
+            if answer_info[0].isdigit():
+                answer_list[answer_info[1]] = answer_info[2][1:-1]
+                print answer_list[answer_info[1]]
+    return answer_list
 
 def find_question_type(question):
     type_index = -1
@@ -49,5 +61,4 @@ def find_question_type(question):
                 type_index = i
             
     return type_index
-
-read_choices('./ex.txt')
+read_answers('./ex.txt')
