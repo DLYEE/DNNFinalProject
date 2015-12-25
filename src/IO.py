@@ -2,7 +2,8 @@ from constants import question_types
 import shlex
 
 def read_questions(file):
-    question_list = {}
+    question_dict = {}
+    keyOrder = []
     with open(file,'r+') as questions_file:
         for line in questions_file:
             #question_info[0]: img_id
@@ -11,13 +12,14 @@ def read_questions(file):
             question_info  = shlex.split(line, posix=False)
             #ignore the first line of the file
             if question_info[0].isdigit():
-                #save the question type index and the question in the question_list, which is a dictionary
+                #save the question type index and the question in the question_dict, which is a dictionary
                 #question_info[2][1:-1] => avoid double quotes 
-                question_list[question_info[1]] = [find_question_type(question_info[2]), question_info[2][1:-1] ]
-    return question_list
+                question_dict[question_info[1]] = [find_question_type(question_info[2]), question_info[2][1:-1] ]
+                keyOrder.append(question_info[1])
+    return question_dict, keyOrder
 
 def read_choices(file):
-    choice_list = {}
+    choice_dict = {}
     with open(file, 'r+') as choices_file:
         for line in choices_file:
             #choice_info[0]: img_id
@@ -26,27 +28,27 @@ def read_choices(file):
             choice_info = shlex.split(line)
             #ignore the first line of the file
             if choice_info[0].isdigit():
-                #record the choices and save into the choice_list
+                #record the choices and save into the choice_dict
                 choices = []
                 #choices[0] for A, choices[1] for B.....
                 #ex: choices[0] = "(A)....", choices[1] = "(B)...."
                 for i in range(2,len(choice_info)):
                     #ignore (A), (B)...
                     choices.append(choice_info[i][3:])
-                choice_list[choice_info[1]] = choices
-                print choice_list[choice_info[1]]
+                choice_dict[choice_info[1]] = choices
+                print choice_dict[choice_info[1]]
 
-    return choice_list
+    return choice_dict
 
 def read_answers(file):
-    answer_list = {}
+    answer_dict = {}
     with open(file, 'r+') as answer_file:
         for line in answer_file:
             answer_info = shlex.split(line, posix=False)
             if answer_info[0].isdigit():
-                answer_list[answer_info[1]] = answer_info[2][1:-1]
-                print answer_list[answer_info[1]]
-    return answer_list
+                answer_dict[answer_info[1]] = answer_info[2][1:-1]
+                print answer_dict[answer_info[1]]
+    return answer_dict
 
 def find_question_type(question):
     type_index = -1
@@ -61,4 +63,8 @@ def find_question_type(question):
                 type_index = i
             
     return type_index
-read_answers('./ex.txt')
+
+###
+def write_file(f, answer, keyOrder):
+    呈翰write it!!!
+###
