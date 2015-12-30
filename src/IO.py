@@ -1,7 +1,23 @@
 from constants import question_types  
 import shlex
 
-def read_questions(file):
+def read_qid(file):
+    print "Reading qid..."
+    keyOrder = []
+    with open(file,'r+') as questions_file:
+        for line in questions_file:
+            #question_info[0]: img_id
+            #question_info[1]: q_id
+            #question_info[2]: question
+            question_info  = shlex.split(line, posix=False)
+            #ignore the first line of the file
+            if question_info[0].isdigit():
+                #save the question type index and the question in the question_dict, which is a dictionary
+                #question_info[2][1:-1] => avoid double quotes 
+                keyOrder.append(question_info[1])
+    return keyOrder
+
+def read_question(file):
     question_dict = {}
     keyOrder = []
     with open(file,'r+') as questions_file:
@@ -47,7 +63,7 @@ def read_choices(file):
 
     return choice_dict
 
-def read_answers(file):
+def read_answer(file):
     answer_dict = {}
     with open(file, 'r+') as answer_file:
         for line in answer_file:
@@ -80,7 +96,60 @@ def find_question_type(question):
             
     return type_index
 
-###
-def write_file(f, answer, keyOrder):
-    呈翰write it!!!
-###
+def read_question_vec(file):
+    print "Reading question_vec..."
+    with open(file,'r+') as questions_file:
+        question_vec = []
+        for line in questions_file:
+            #question_info[0]: sent_id
+            #question_info[1:]: feature_vec
+            question_info  = shlex.split(line, posix=False)
+            #ignore the first line of the file
+            if not question_info[0].isdigit():
+                question_vec.append(question_info[1:])
+    return question_vec
+
+def read_answer_vec(file):
+    print "Reading answer_vec..."
+    with open(file,'r+') as answers_file:
+        answer_vec = []
+        for line in answers_file:
+            #answer_info[0]: sent_id
+            #answer_info[1:]: feature_vec
+            answer_info  = shlex.split(line, posix=False)
+            #ignore the first line of the file
+            if not answer_info[0].isdigit():
+                answer_vec.append(answer_info[1:])
+    return answer_vec
+
+def read_choices_vec(file):
+    print "Reading choices_vec..."
+    #dimension of choices_vec: (# of questions) * 5 * (size of feature vec)
+    with open(file,'r+') as choices_file:
+        choices_vec = []
+        choices_of_a_question = []
+        count = 0
+        for line in choices_file:
+            #choices_info[0]: sent_id
+            #choices_info[1:]: feature_vec
+            choices_info  = shlex.split(line, posix=False)
+            #ignore the first line of the file
+            if not choices_info[0].isdigit():
+                choices_of_a_question.append(question_info[1:])
+                count += 1
+            if not (count % 5):
+                choices_vec.append(choices_of_a_question)
+                choices_of_a_question = []
+                count = 0
+    return choices_vec
+
+def write_file(file, answer, keyOrder):
+    print "Writing file..."
+    with open(file, 'w') as f:
+        f.write('q_id,ans')
+        for i in range(len(keyOrder)):
+            f.write('\n')
+            f.write(keyOder[i])
+            f.write(',')
+            f.write(answer[i])
+
