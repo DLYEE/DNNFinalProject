@@ -2,19 +2,19 @@ import IO
 import logging
 import sys
 import os
-sys.path.insert(0, '/Users/apple/sentence2vec')
+sys.path.insert(0, '/home/grtzsohalf/sentence2vec')
 import word2vec
 from word2vec import Word2Vec, Sent2Vec, LineSentence
 
 #make files for word embedding
 # if not open('question_word.train','r+'):
-x_train_dict, trainKeyOrder = IO.read_questions('data/final_project_pack/question.train')
+x_train_dict, trainKeyOrder = IO.read_question('data/final_project_pack/question.train')
 with open('data/vec/question_word.train','w') as word_file:
     for key in trainKeyOrder:
         word_file.write(x_train_dict[key][1] + '\n')
 
 # if not open('answer_word.train','r+'):
-y_train_dict = IO.read_answers('data/final_project_pack/answer.train')
+y_train_dict = IO.read_answer('data/final_project_pack/answer.train')
 with open('data/vec/answer_word.train','w') as word_file:
     for key in trainKeyOrder:
         word_file.write(y_train_dict[key] + '\n')
@@ -27,7 +27,7 @@ with open('data/vec/choices_word.train','w') as word_file:
             word_file.write(index + '\n')
 
 # if not open('question_word.test','r+'):
-x_test_dict, testKeyOrder = IO.read_questions('data/final_project_pack/question.test')
+x_test_dict, testKeyOrder = IO.read_question('data/final_project_pack/question.test')
 with open('data/vec/question_word.test','w') as word_file:
     for key in testKeyOrder:
         word_file.write(x_test_dict[key][1] + '\n')
