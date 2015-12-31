@@ -106,6 +106,8 @@ def read_question_vec(file):
             question_info  = shlex.split(line, posix=False)
             #ignore the first line of the file
             if not question_info[0].isdigit():
+                for i in range(len(question_info[1:])):
+                    question_info[i+1] = float(question_info[i+1])
                 question_vec.append(question_info[1:])
     return question_vec
 
@@ -119,6 +121,8 @@ def read_answer_vec(file):
             answer_info  = shlex.split(line, posix=False)
             #ignore the first line of the file
             if not answer_info[0].isdigit():
+                for i in range(len(answer_info[1:])):
+                    answer_info[i+1] = float(answer_info[i+1])
                 answer_vec.append(answer_info[1:])
     return answer_vec
 
@@ -135,12 +139,14 @@ def read_choices_vec(file):
             choices_info  = shlex.split(line, posix=False)
             #ignore the first line of the file
             if not choices_info[0].isdigit():
-                choices_of_a_question.append(question_info[1:])
+                for i in range(len(choices_info[1:])):
+                    choices_info[i+1] = float(choices_info[i+1])
+                choices_of_a_question.append(choices_info[1:])
                 count += 1
-            if not (count % 5):
+            if count != 0 and not (count % 5):
                 choices_vec.append(choices_of_a_question)
                 choices_of_a_question = []
-                count = 0
+        print count
     return choices_vec
 
 def write_file(file, answer, keyOrder):
@@ -149,7 +155,16 @@ def write_file(file, answer, keyOrder):
         f.write('q_id,ans')
         for i in range(len(keyOrder)):
             f.write('\n')
-            f.write(keyOder[i])
+            f.write(keyOrder[i])
             f.write(',')
-            f.write(answer[i])
+            if answer[i] == 0:
+                f.write('A')
+            elif answer[i] == 1:
+                f.write('B')
+            elif answer[i] == 2:
+                f.write('C')
+            elif answer[i] == 3:
+                f.write('D')
+            elif answer[i] == 4:
+                f.write('E')
 

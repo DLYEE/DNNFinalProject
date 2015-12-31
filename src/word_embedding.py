@@ -55,7 +55,7 @@ logging.info("running %s" % " ".join(sys.argv))
 
 input_file = 'data/vec/word_embed.txt'
 #make model
-word_model = Word2Vec(LineSentence(input_file), size=100, window=5, sg=0, workers=8)
+word_model = Word2Vec(LineSentence(input_file), size=100, window=5, sg=0, min_count=0, workers=8)
 #save model
 word_model.save(input_file + '.model')
 #save word vectors
