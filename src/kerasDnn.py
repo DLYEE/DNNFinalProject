@@ -6,6 +6,7 @@ from keras import backend as K
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation
 from keras.optimizers import SGD
+from keras import backend as K
 
 def construct_model():
     # Dense(64) is a fully-connected layer with 64 hidden units.
