@@ -34,7 +34,7 @@ def train():
     def cost_function(y_true, y_pred):
         len1 = K.sqrt(K.sum(y * y for y in y_true))
         len2 = K.sqrt(K.sum(y * y for y in y_pred))
-        return K.dot(y_true, y_pred) / (len1 * len2)
+        return (y_true * y_pred) / (len1 * len2)
 
     # trainKeyOrder = IO.read_qid('data/final_project_pack/question.train')
     x_train = np.asarray(IO.read_question_vec('data/vec/question_word.train.vec'))
