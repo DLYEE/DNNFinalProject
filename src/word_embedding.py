@@ -55,11 +55,12 @@ def train_sent_vec(fword, fsent):
     #save sentence vectors
     sent_model.save_sent2vec_format(fsent + '.vec')
 
-question_train_file = 'data/vec/final_project_pack/question.train'
-answer_train_file = 'data/vec/final_project_pack/answer.train'
-choices_train_file = 'data/vec/final_project_pack/choices.train'
-question_test_file = 'data/vec/final_project_pack/question.test'
-choices_test_file = 'data/vec/final_project_pack/choices.test'
+
+question_train_file = 'data/final_project_pack/question.train'
+answer_train_file = 'data/final_project_pack/answer.train'
+choices_train_file = 'data/final_project_pack/choices.train'
+question_test_file = 'data/final_project_pack/question.test'
+choices_test_file = 'data/final_project_pack/choices.test'
 
 #read from files to dict
 x_train_dict, trainKeyOrder = IO.read_question(question_train_file)
@@ -68,11 +69,11 @@ c_train_dict = IO.read_choices(choices_train_file)
 x_test_dict, testKeyOrder = IO.read_question(question_test_file)
 c_test_dict = IO.read_choices(choices_test_file)
 
-question_train_word_file = 'data/vec/final_project_pack/question_word.train'
-answer_train_word_file = 'data/vec/final_project_pack/answer_word.train'
-choices_train_word_file = 'data/vec/final_project_pack/choices_word.train'
-question_test_word_file = 'data/vec/final_project_pack/question_word.test'
-choices_test_word_file = 'data/vec/final_project_pack/choices_word.test'
+question_train_word_file = 'data/vec/question_word.train'
+answer_train_word_file = 'data/vec/answer_word.train'
+choices_train_word_file = 'data/vec/choices_word.train'
+question_test_word_file = 'data/vec/question_word.test'
+choices_test_word_file = 'data/vec/choices_word.test'
 
 #make files for word embedding
 make_question_word_embed_file(question_train_word_file, x_train_dict, trainKeyOrder)
@@ -81,7 +82,7 @@ make_choices_word_embed_file(choices_train_word_file, c_train_dict, trainKeyOrde
 make_question_word_embed_file(question_test_word_file, x_test_dict, testKeyOrder)
 make_choices_word_embed_file(choices_test_word_file, c_test_dict, testKeyOrder)
 
-word_embed_file = 'data/vec/final_project_pack/word_embed.txt'
+word_embed_file = 'data/vec/word_embed.txt'
 make_total_word_embed_file(word_embed_file, question_train_word_file, choices_train_word_file, question_test_word_file, choices_test_word_file )
 
 
@@ -90,7 +91,7 @@ logging.basicConfig(format='%(asctime)s : %(threadName)s : %(levelname)s : %(mes
 logging.info("running %s" % " ".join(sys.argv))
 
 #train a word model from word_embed_file
-train_word_model(word_embed_file, vecsize=400, mincount=0)
+train_word_model(word_embed_file, vecsize=100, mincount=0)
 #train sentence vectors from previously train word model
 train_sent_vec(word_embed_file, question_train_word_file)
 train_sent_vec(word_embed_file, answer_train_word_file)
