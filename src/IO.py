@@ -2,6 +2,25 @@ from constants import question_types
 import shlex
 import time
 
+def read_imageid(file):
+    t_start = time.time()
+    print "Reading qid..."
+    keyOrder = []
+    with open(file,'r+') as questions_file:
+        for line in questions_file:
+            #question_info[0]: img_id
+            #question_info[1]: q_id
+            #question_info[2]: question
+            question_info  = shlex.split(line, posix=False)
+            #ignore the first line of the file
+            if question_info[0].isdigit():
+                #save the question type index and the question in the question_dict, which is a dictionary
+                #question_info[2][1:-1] => avoid double quotes 
+                keyOrder.append(question_info[0])
+    t_end = time.time()
+    print "time cost = ", t_end - t_start
+    return keyOrder
+
 def read_qid(file):
     t_start = time.time()
     print "Reading qid..."

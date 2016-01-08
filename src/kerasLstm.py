@@ -24,13 +24,13 @@ def construct_model():
     model.add(Dense(1024, input_dim = 300, init='uniform'))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    for i in range(1):
+    for i in range(2):
         model.add(Dense(1024, init='uniform'))
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
     model.add(Dense(100, init='uniform'))
     model.add(Activation('relu'))
-    model.add(Dropout(0.5))
+    # model.add(Dropout(0.5))
     # model.add(Dense(100, init='uniform'))
     # model.add(Activation('softmax'))
 
@@ -78,23 +78,26 @@ def train(dictionary):
 
     def train_on_batch(num_lines, y_train):
         wordfile = open("data/text/question_word.train", 'r+')
-        if num_lines != len(y_train):
-            print "Input and label have different size. I =", num_lines,", L =",len(y_train)
+        # if num_lines != len(y_train):
+            # print "Input and label have different size. I =", num_lines,", L =",len(y_train)
         current_lines = 0
         batch_size = 128
         # mini_batch_size = 32
         lines = ""
         linevec = []
+        loss = 0
+        count = 0
         for line in wordfile:
             if current_lines % 5000 == 0 and current_lines != 0:
-                print "Reading train", current_lines, "lines..."
+                print "Training", current_lines, "lines..."
             if current_lines == num_lines -1:
                 lines += line
                 current_lines += 1
                 x_batch = make_batch(lines, dictionary)
                 y_batch = np.asarray(y_train[num_lines - num_lines % batch_size:])
                 # model.fit(x_batch, y_batch, mini_batch_size, 1)
-                model.train_on_batch(x_batch, y_batch)
+                loss += model.train_on_batch(x_batch, y_batch)[0]
+                count += 1
                 lines = ""
             if current_lines % batch_size == batch_size -1:
                 lines += line
@@ -102,11 +105,13 @@ def train(dictionary):
                 x_batch = make_batch(lines, dictionary)
                 y_batch = np.asarray(y_train[current_lines-batch_size:current_lines])
                 # model.fit(x_batch, y_batch, mini_batch_size, 1)
-                model.train_on_batch(x_batch, y_batch)
+                loss += model.train_on_batch(x_batch, y_batch)[0]
+                count += 1
                 lines = "" 
             else:
                 lines += line
                 current_lines += 1
+        print "Loss = ", loss / count
         wordfile.close()
     
     # trainKeyOrder = IO.read_qid('data/final_project_pack/question.train')
@@ -124,11 +129,17 @@ def train(dictionary):
     
     # train in batches
     num_lines = count_num_lines()
-    train_on_batch(num_lines, y_train)
+    num_epoch = 30
+    for i in range(num_epoch):
+        print "It's the ", i+1, " epoch."
+        t_s = time.time()
+        train_on_batch(num_lines, y_train)
+        t_e = time.time()
+        print "Time cost = ", t_e - t_s
 
     print "Training ends."
     t_end = time.time()
-    print "time cost = ", t_end - t_start
+    print "Total time cost = ", t_end - t_start
 
 def test(dictionary):
     
@@ -156,20 +167,20 @@ def test(dictionary):
         predict = np.empty([0, 100])
         for line in wordfile:
             if current_lines % 10000 == 0 and current_lines != 0:
-                print "Reading test", current_lines, "lines..."
+                print "Testing", current_lines, "lines..."
             if current_lines == num_lines -1:
                 lines += line
                 x_batch = make_batch(lines, dictionary)
                 if predict.size == 0:
                     # predict = model.predict(x_batch, 50)
                     predict = model.predict_on_batch(x_batch)[0]
-                    print len(predict)
+                    # print len(predict)
                 else:
                     # predict = np.vstack((predict, model.predict(x_batch, 50)))
                     # print predict.shape
                     # print model.predict_on_batch(x_batch)[0].shape
                     predict = np.vstack((predict, model.predict_on_batch(x_batch)[0]))
-                    print len(predict)
+                    # print len(predict)
                 lines = ""
                 current_lines += 1
             if current_lines % batch_size == batch_size -1:
@@ -178,21 +189,21 @@ def test(dictionary):
                 if predict.size == 0:
                     # predict = model.predict(x_batch, 50)
                     predict = model.predict_on_batch(x_batch)[0]
-                    print len(predict)
+                    # print len(predict)
                 else:
                     # predict = np.vstack((predict, model.predict(x_batch, 50)))
                     # print predict.shape
                     # print model.predict_on_batch(x_batch)[0].shape
                     predict = np.vstack((predict, model.predict_on_batch(x_batch)[0]))
-                    print len(predict)
+                    # print len(predict)
                 lines = "" 
                 current_lines += 1
             else:
                 lines += line
                 current_lines += 1
         wordfile.close()
-        print "size of predict = ", len(predict)
-        print "predict = ", predict
+        # print "size of predict = ", len(predict)
+        # print "predict = ", predict
         return predict
 
     def generate_answer(predict, choices, answer):

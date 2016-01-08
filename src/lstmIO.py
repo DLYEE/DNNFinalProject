@@ -35,24 +35,24 @@ def specialword(vec, dictionary, word):
         value = dictionary.get(word)
         if value != None:
             vec.append(dictionary[word])
-        else:
-            print "Cannot find ",word, " in dictionary."
+        # else:
+            # print "Cannot find ",word, " in dictionary."
         vec.append(dictionary[tail])
     elif(word[-2:] == "\'s"):
         tail = word[-2:]
         value = dictionary.get(word[:-2])
         if value != None:
             vec.append(dictionary[word[:-2]])
-        else:
-            print "Cannot find ",word, " in dictionary."
+        # else:
+            # print "Cannot find ",word, " in dictionary."
         vec.append(dictionary[word[-2:]])
     elif(word[-3:] == "n\'t" or word[-3:] == "\'re" or word[-3:] == "\'ve"):
         tail = word[-3:]
         value = dictionary.get(word[:-3])
         if value != None:
             vec.append(dictionary[word[:-3]])
-        else:
-            print "Cannot find ",word, " in dictionary."
+        # else:
+            # print "Cannot find ",word, " in dictionary."
         vec.append(dictionary[word[-3:]])
     else:
         return
