@@ -14,6 +14,7 @@ from keras.layers.embeddings import Embedding
 from keras import backend as K
 
 def construct_model():
+    model = Sequential()
     # Dense(64) is a fully-connected layer with 64 hidden units.
     # in the first layer, you must specify the expected input data shape:
     model.add(LSTM(300, input_dim = 300, return_sequences = False, activation='sigmoid', inner_activation='hard_sigmoid'))
@@ -245,7 +246,6 @@ def test(dictionary):
 ### main code
 ###
 
-model = Sequential()
 construct_model()
 dictionary = lstmIO.readGlove("data/glove.840B.300d.txt", 150000)
 train(dictionary)
