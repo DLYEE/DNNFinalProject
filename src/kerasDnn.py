@@ -10,7 +10,6 @@ from keras.optimizers import Adadelta
 from keras import backend as K
 
 def construct_model():
-    model = Sequential()
     # Dense(64) is a fully-connected layer with 64 hidden units.
     # in the first layer, you must specify the expected input data shape:
     # here, 100-dimensional vectors.
@@ -105,6 +104,7 @@ def test():
 ### main code
 ###
 
+model = Sequential()
 construct_model()
 train()
 test()
