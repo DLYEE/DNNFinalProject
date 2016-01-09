@@ -14,21 +14,20 @@ from keras.layers.embeddings import Embedding
 from keras import backend as K
 
 def construct_model():
-    model = Sequential()
     # Dense(64) is a fully-connected layer with 64 hidden units.
     # in the first layer, you must specify the expected input data shape:
     model.add(LSTM(300, input_dim = 300, return_sequences = False, activation='sigmoid', inner_activation='hard_sigmoid'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.7))
     # model.add(Dense(100,1))
     # model.add(Activation('sigmoid'))
     # here, 100-dimensional vectors.
     model.add(Dense(1024, input_dim = 300, init='uniform'))
     model.add(Activation('relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.7))
     for i in range(2):
         model.add(Dense(1024, init='uniform'))
         model.add(Activation('relu'))
-        model.add(Dropout(0.5))
+        model.add(Dropout(0.7))
     model.add(Dense(100, init='uniform'))
     model.add(Activation('relu'))
     # model.add(Dropout(0.5))
@@ -130,7 +129,7 @@ def train(dictionary):
     
     # train in batches
     num_lines = count_num_lines()
-    num_epoch = 30
+    num_epoch = 50
     for i in range(num_epoch):
         print "It's the ", i+1, " epoch."
         t_s = time.time()
@@ -246,6 +245,7 @@ def test(dictionary):
 ### main code
 ###
 
+model = Sequential()
 construct_model()
 dictionary = lstmIO.readGlove("data/glove.840B.300d.txt", 150000)
 train(dictionary)
