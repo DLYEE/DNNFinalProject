@@ -14,25 +14,33 @@ from keras.layers.embeddings import Embedding
 from keras import backend as K
 
 def construct_model():
-    # Dense(64) is a fully-connected layer with 64 hidden units.
+    # Dense(300) is a fully-connected layer with 300 hidden units.
     # in the first layer, you must specify the expected input data shape:
     model.add(LSTM(300, input_dim = 300, return_sequences = False, activation='sigmoid', inner_activation='hard_sigmoid'))
-    model.add(Dropout(0.7))
+    model.add(Dropout(0.5))
     # model.add(Dense(100,1))
     # model.add(Activation('sigmoid'))
     # here, 100-dimensional vectors.
     model.add(Dense(1024, input_dim = 300, init='uniform'))
     model.add(Activation('relu'))
-    model.add(Dropout(0.7))
+    model.add(Dropout(0.5))
     for i in range(2):
         model.add(Dense(1024, init='uniform'))
         model.add(Activation('relu'))
-        model.add(Dropout(0.7))
-    model.add(Dense(100, init='uniform'))
+        model.add(Dropout(0.5))
+    model.add(Dense(300, init='uniform'))
     model.add(Activation('relu'))
     # model.add(Dropout(0.5))
-    # model.add(Dense(100, init='uniform'))
+    # model.add(Dense(300, init='uniform'))
     # model.add(Activation('softmax'))
+
+def word2vec(word, dictionary, vec):
+    # print word
+    value = dictionary.get(word)
+    if (None != value):
+        vec.append(value)
+    elif (len(word) > 0):
+        lstmIO.specialword(vec, dictionary, word)
 
 def make_batch(lines, dictionary):
     line = lines.splitlines()
@@ -42,11 +50,7 @@ def make_batch(lines, dictionary):
         linevec = []
         sentence = re.split(" |\n",line[index])
         for i in range(len(sentence)):
-            value = dictionary.get(sentence[i])
-            if (None != value):
-                linevec.append(value)
-            elif (len(sentence[i]) > 0):
-                lstmIO.specialword(linevec, dictionary, sentence[i])
+            word2vec(sentence[i], dictionary, linevec)
         wordvec_list.append(linevec)
         length = len(linevec)
         if length > max_len:
@@ -125,11 +129,19 @@ def train(dictionary):
 
     print "Training begins..."
     t_start = time.time()
-    y_train = np.asarray(IO.read_answer_vec('data/vec/answer_word.train.vec'))
+    # y_train = np.asarray(IO.read_answer_vec('data/vec/answer_word.train.vec'))
+    y_train_txt = lstmIO.read_answer_txt('data/text/answer_word.train')
+    y_train = []
+    for i in range(len(y_train_txt)):
+        linevec = []
+        for j in range(len(y_train_txt[i])):
+            word2vec(y_train_txt[i][j], dictionary, linevec)
+        y_train.append(np.sum(linevec, axis=0) / len(y_train_txt[i]))
+    y_train = np.asarray(y_train)
     
     # train in batches
     num_lines = count_num_lines()
-    num_epoch = 50
+    num_epoch = 30
     for i in range(num_epoch):
         print "It's the ", i+1, " epoch."
         t_s = time.time()
@@ -206,18 +218,15 @@ def test(dictionary):
         # print "predict = ", predict
         return predict
 
-    def generate_answer(predict, choices, answer):
-        for index in range(len(testKeyOrder)):
-            cos_similarity = -100000000
-            answer_of_a_question = -1
-            for i in range(5):
-                # print choices[index][i]
-                # print predict[index]
-                sim = similarity(choices[index][i], predict[index])
-                if sim > cos_similarity:
-                    cos_similarity = sim
-                    answer_of_a_question = i
-            answer.append(answer_of_a_question)
+    def generate_answer(count, predict, choices, answer):
+        cos_similarity = -100000000
+        answer_of_a_question = -1
+        for i in range(5):
+            sim = similarity(choices[index][i], predict)
+            if sim > cos_similarity:
+                cos_similarity = sim
+                answer_of_a_question = i
+        answer.append(answer_of_a_question)
 
     testKeyOrder = np.asarray(IO.read_qid('data/final_project_pack/question.test'))
     print "Testing begins..."
@@ -229,12 +238,26 @@ def test(dictionary):
     t_end = time.time()
     print "time cost = ", t_end - t_start
 
-    choices = np.asarray(IO.read_choices_vec('data/vec/choices_word.test.vec'))
+    # choices = np.asarray(IO.read_choices_vec('data/vec/choices_word.test.vec'))
+    choices_txt = lstmIO.read_choices_txt('data/text/choices_word.test')
     # pick the answer among 5 choices
     print "Generating answer..."
     t_start = time.time()
     answer = []
-    generate_answer(predict, choices, answer)
+    count = 0
+    for i in range(len(choices_txt)):
+        linevec = []
+        choices_of_a_question = []
+        for j in range(len(choices_txt[i])):
+            word2vec(choices_txt[i][j], dictionary, linevec)
+        choices_of_a_question.append(np.sum(linevec, axis=0) / len(choices_txt[i]))
+        count += 1
+        if count % 5 == 0:
+            choices_of_a_question = np.asarray(choices_of_a_question)
+            generate_answer(count, predict[count / 5], choices_of_a_question, answer)
+            choices_of_a_question = []
+        if count % 1000 == 0:
+            print len(answer)
     t_end = time.time()
     print "time cost = ", t_end - t_start
 
@@ -247,7 +270,7 @@ def test(dictionary):
 
 model = Sequential()
 construct_model()
-dictionary = lstmIO.readGlove("data/glove.840B.300d.txt", 150000)
+dictionary = lstmIO.readGlove("data/glove.840B.300d.txt", 200000)
 train(dictionary)
 test(dictionary)
 
