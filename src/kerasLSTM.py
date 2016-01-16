@@ -37,10 +37,11 @@ def construct_model():
 def word2vec(word, dictionary, vec):
     # print word
     value = dictionary.get(word)
-    if (None != value):
+    if (value != None):
         vec.append(value)
     elif (len(word) > 0):
         lstmIO.specialword(vec, dictionary, word)
+        # print "len of vec in word2vec =", len(vec)
 
 def make_batch(lines, dictionary):
     line = lines.splitlines()
@@ -51,6 +52,8 @@ def make_batch(lines, dictionary):
         sentence = re.split(" |\n",line[index])
         for i in range(len(sentence)):
             word2vec(sentence[i], dictionary, linevec)
+        # if index == 0:
+            # print len(linevec)
         wordvec_list.append(linevec)
         length = len(linevec)
         if length > max_len:
@@ -136,12 +139,20 @@ def train(dictionary):
         linevec = []
         for j in range(len(y_train_txt[i])):
             word2vec(y_train_txt[i][j], dictionary, linevec)
+            # value = dictionary.get(y_train_txt[i][j])
+            # if (value != None):
+                # linevec.append(value)
+            # elif (len(y_train_txt[i][j]) > 0):
+                # lstmIO.specialword(linevec, dictionary, y_train_txt[i][j])
+                # print "len of vec in word2vec =", len(linevec)
+            # if i==0:
+                # print j, len(linevec)
         y_train.append(np.sum(linevec, axis=0) / len(y_train_txt[i]))
     y_train = np.asarray(y_train)
     
     # train in batches
     num_lines = count_num_lines()
-    num_epoch = 30
+    num_epoch = 40
     for i in range(num_epoch):
         print "It's the ", i+1, " epoch."
         t_s = time.time()
@@ -218,11 +229,11 @@ def test(dictionary):
         # print "predict = ", predict
         return predict
 
-    def generate_answer(count, predict, choices, answer):
+    def generate_answer(predict, choices, answer):
         cos_similarity = -100000000
         answer_of_a_question = -1
         for i in range(5):
-            sim = similarity(choices[index][i], predict)
+            sim = similarity(choices[i], predict)
             if sim > cos_similarity:
                 cos_similarity = sim
                 answer_of_a_question = i
@@ -240,24 +251,44 @@ def test(dictionary):
 
     # choices = np.asarray(IO.read_choices_vec('data/vec/choices_word.test.vec'))
     choices_txt = lstmIO.read_choices_txt('data/text/choices_word.test')
+    # print len(choices_txt)
+    # print "len of choices_txt =", len(choices_txt)
     # pick the answer among 5 choices
     print "Generating answer..."
     t_start = time.time()
     answer = []
     count = 0
+    choices_of_a_question = []
+    # time_b = time.time()
+    time_count = 0
     for i in range(len(choices_txt)):
         linevec = []
-        choices_of_a_question = []
-        for j in range(len(choices_txt[i])):
+        # print choices_txt[i]
+        # print len(choices_txt[i])
+        time_begin = time.time()
+        for j in range(len(choices_txt[i]) - 3):
+            # print choices_txt[i][j]
             word2vec(choices_txt[i][j], dictionary, linevec)
-        choices_of_a_question.append(np.sum(linevec, axis=0) / len(choices_txt[i]))
+            # value = dictionary.get(choices_txt[i][j])
+            # if (value != None):
+                # linevec.append(value)
+            # elif (len(choices_txt[i][j]) > 0):
+                # lstmIO.specialword(linevec, dictionary, choices_txt[i][j])
+        time_end = time.time()
+        time_count += (time_end - time_begin)
+        choices_of_a_question.append(np.sum(linevec, axis=0) / (len(choices_txt[i]) - 3))
+        # print "choices_of_a_question after appending: ",choices_of_a_question
+        # print choices_of_a_question
         count += 1
+        # print "count =", count
         if count % 5 == 0:
-            choices_of_a_question = np.asarray(choices_of_a_question)
-            generate_answer(count, predict[count / 5], choices_of_a_question, answer)
+            # choices_of_a_question = np.asarray(choices_of_a_question)
+            generate_answer(predict[count / 5 - 1], choices_of_a_question, answer)
             choices_of_a_question = []
-        if count % 1000 == 0:
+        if count % 25000 == 0:
             print len(answer)
+            print time_count
+            time_count = 0
     t_end = time.time()
     print "time cost = ", t_end - t_start
 

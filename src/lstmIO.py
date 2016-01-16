@@ -1,5 +1,6 @@
 import time
 import re
+import numpy as np
 import random
 
 def readGlove(f, lines):
@@ -59,13 +60,15 @@ def specialword(vec, dictionary, word):
             # print "Cannot find ",word, " in dictionary."
         vec.append(dictionary[word[-3:]])
     else:
-        random_list = random.sample(range(1000000), 300)
-        # print random_list
-        for i in range(300):
-            random_list[i] = float(random_list[i] - 500000) / float(500000)
-        # print random_list
-        vec.append(random_list)
+        # random_list = random.sample(range(1000000), 300)
+        # # print random_list
+        # for i in range(300):
+            # random_list[i] = float(random_list[i] - 500000) / float(500000)
+        # # print random_list
+        # vec.append(random_list)
+        vec.append(np.zeros(300))
         # print "Cannot find ",word, " in dictionary."
+    # print "len of vec in specialword =", len(vec)
 
 def read_answer_txt(file):
     print "Reading answer_txt..."
