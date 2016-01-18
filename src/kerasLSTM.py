@@ -74,14 +74,14 @@ def train(dictionary):
         return - K.sum(y_true * y_pred) / (len1 * len2)
     
     def count_num_lines():
-        wordfile = open("data/text/question_word.train", 'r+')
+        wordfile = open("data/vec_100/question_word.train", 'r+')
         num_lines = sum(1 for line in wordfile)
         print "There are ", num_lines, "lines in train file."
         wordfile.close()
         return num_lines
 
     def train_on_batch(num_lines, y_train):
-        wordfile = open("data/text/question_word.train", 'r+')
+        wordfile = open("data/vec_100/question_word.train", 'r+')
         # if num_lines != len(y_train):
             # print "Input and label have different size. I =", num_lines,", L =",len(y_train)
         current_lines = 0
@@ -130,7 +130,7 @@ def train(dictionary):
     print "Training begins..."
     t_start = time.time()
     # y_train = np.asarray(IO.read_answer_vec('data/vec/answer_word.train.vec'))
-    y_train_txt = lstmIO.read_answer_txt('data/text/answer_word.train')
+    y_train_txt = lstmIO.read_answer_txt('data/vec_100/answer_word.train')
     y_train = []
     for i in range(len(y_train_txt)):
         linevec = []
@@ -164,14 +164,14 @@ def test(dictionary):
         return np.dot(sent_vec1, sent_vec2) / (len1 * len2)
     
     def count_num_lines():
-        wordfile = open("data/text/question_word.test", 'r+')
+        wordfile = open("data/vec_100/question_word.test", 'r+')
         num_lines = sum(1 for line in wordfile)
         print "There are ", num_lines, "lines in test file."
         wordfile.close()
         return num_lines
 
     def test_on_batch(num_lines):
-        wordfile = open("data/text/question_word.test", 'r+')
+        wordfile = open("data/vec_100/question_word.test", 'r+')
         current_lines = 0
         batch_size = 128
         lines = ""
@@ -239,7 +239,7 @@ def test(dictionary):
     print "time cost = ", t_end - t_start
 
     # choices = np.asarray(IO.read_choices_vec('data/vec/choices_word.test.vec'))
-    choices_txt = lstmIO.read_choices_txt('data/text/choices_word.test')
+    choices_txt = lstmIO.read_choices_txt('data/vec_100/choices_word.test')
     # pick the answer among 5 choices
     print "Generating answer..."
     t_start = time.time()
@@ -270,7 +270,7 @@ def test(dictionary):
 
 model = Sequential()
 construct_model()
-dictionary = lstmIO.readGlove("data/glove.840B.300d.txt", 200000)
+dictionary = lstmIO.readGlove("data/WordEmbedding/glove.840B.300d.txt", 200000)
 train(dictionary)
 test(dictionary)
 
