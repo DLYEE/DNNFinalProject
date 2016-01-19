@@ -66,7 +66,7 @@ def specialword(vec, dictionary, word):
             # random_list[i] = float(random_list[i] - 500000) / float(500000)
         # # print random_list
         # vec.append(random_list)
-        vec.append(np.zeros(300))
+        vec.append(np.random.randn(300))
         # print "Cannot find ",word, " in dictionary."
     # print "len of vec in specialword =", len(vec)
 

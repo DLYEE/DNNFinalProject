@@ -123,7 +123,7 @@ def train(dictionary):
     
     # trainKeyOrder = IO.read_qid('data/final_project_pack/question.train')
     # x_train = np.asarray(IO.read_question_vec('data/vec/question_word.train.vec'))
-    LR = 1E-3
+    LR = 2E-3
     print "learning rate = ", LR
     # sgd = SGD(lr=LR, decay=0, momentum=0.9, nesterov=True)
     # ada = Adagrad(lr=0.01, epsilon=1e-06)
@@ -139,20 +139,12 @@ def train(dictionary):
         linevec = []
         for j in range(len(y_train_txt[i])):
             word2vec(y_train_txt[i][j], dictionary, linevec)
-            # value = dictionary.get(y_train_txt[i][j])
-            # if (value != None):
-                # linevec.append(value)
-            # elif (len(y_train_txt[i][j]) > 0):
-                # lstmIO.specialword(linevec, dictionary, y_train_txt[i][j])
-                # print "len of vec in word2vec =", len(linevec)
-            # if i==0:
-                # print j, len(linevec)
         y_train.append(np.sum(linevec, axis=0) / len(y_train_txt[i]))
     y_train = np.asarray(y_train)
     
     # train in batches
     num_lines = count_num_lines()
-    num_epoch = 1
+    num_epoch = 2
     for i in range(num_epoch):
         print "It's the ", i+1, " epoch."
         t_s = time.time()
@@ -167,9 +159,6 @@ def train(dictionary):
 def test(dictionary):
     
     def similarity(sent_vec1, sent_vec2):
-        # for i in range(len(sent_vec1)):
-            # sent_vec1[i] = float(sent_vec1[i])
-            # sent_vec2[i] = float(sent_vec2[i])
         len1 = math.sqrt(sum(x * x for x in sent_vec1))
         len2 = math.sqrt(sum(x * x for x in sent_vec2))
         return np.dot(sent_vec1, sent_vec2) / (len1 * len2)
@@ -269,16 +258,9 @@ def test(dictionary):
         time_begin = time.time()
         for j in range(len(choices_txt[i]) - 1):
             word2vec(choices_txt[i][j], dictionary, linevec)
-            # value = dictionary.get(choices_txt[i][j])
-            # if (value != None):
-                # linevec.append(value)
-            # elif (len(choices_txt[i][j]) > 0):
-                # lstmIO.specialword(linevec, dictionary, choices_txt[i][j])
         time_end = time.time()
         time_count += (time_end - time_begin)
         choices_of_a_question.append(np.sum(linevec, axis = 0) / (len(choices_txt[i]) - 1))
-        # print "choices_of_a_question after appending: ",choices_of_a_question
-        # print choices_of_a_question
         count += 1
         if count % 5 == 0:
             # choices_of_a_question = np.asarray(choices_of_a_question)
