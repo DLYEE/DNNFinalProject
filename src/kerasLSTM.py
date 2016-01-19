@@ -37,10 +37,11 @@ def construct_model():
 def word2vec(word, dictionary, vec):
     # print word
     value = dictionary.get(word)
-    if (None != value):
+    if (value != None):
         vec.append(value)
     elif (len(word) > 0):
         lstmIO.specialword(vec, dictionary, word)
+        # print "len of vec in word2vec =", len(vec)
 
 def make_batch(lines, dictionary):
     line = lines.splitlines()
@@ -51,6 +52,8 @@ def make_batch(lines, dictionary):
         sentence = re.split(" |\n",line[index])
         for i in range(len(sentence)):
             word2vec(sentence[i], dictionary, linevec)
+        # if index == 0:
+            # print len(linevec)
         wordvec_list.append(linevec)
         length = len(linevec)
         if length > max_len:
@@ -74,14 +77,14 @@ def train(dictionary):
         return - K.sum(y_true * y_pred) / (len1 * len2)
     
     def count_num_lines():
-        wordfile = open("data/vec_100/question_word.train", 'r+')
+        wordfile = open("data/stop_word/question_word.train", 'r+')
         num_lines = sum(1 for line in wordfile)
         print "There are ", num_lines, "lines in train file."
         wordfile.close()
         return num_lines
 
     def train_on_batch(num_lines, y_train):
-        wordfile = open("data/vec_100/question_word.train", 'r+')
+        wordfile = open("data/stop_word/question_word.train", 'r+')
         # if num_lines != len(y_train):
             # print "Input and label have different size. I =", num_lines,", L =",len(y_train)
         current_lines = 0
@@ -130,18 +133,26 @@ def train(dictionary):
     print "Training begins..."
     t_start = time.time()
     # y_train = np.asarray(IO.read_answer_vec('data/vec/answer_word.train.vec'))
-    y_train_txt = lstmIO.read_answer_txt('data/vec_100/answer_word.train')
+    y_train_txt = lstmIO.read_answer_txt('data/stop_word/answer_word.train')
     y_train = []
     for i in range(len(y_train_txt)):
         linevec = []
         for j in range(len(y_train_txt[i])):
             word2vec(y_train_txt[i][j], dictionary, linevec)
+            # value = dictionary.get(y_train_txt[i][j])
+            # if (value != None):
+                # linevec.append(value)
+            # elif (len(y_train_txt[i][j]) > 0):
+                # lstmIO.specialword(linevec, dictionary, y_train_txt[i][j])
+                # print "len of vec in word2vec =", len(linevec)
+            # if i==0:
+                # print j, len(linevec)
         y_train.append(np.sum(linevec, axis=0) / len(y_train_txt[i]))
     y_train = np.asarray(y_train)
     
     # train in batches
     num_lines = count_num_lines()
-    num_epoch = 30
+    num_epoch = 1
     for i in range(num_epoch):
         print "It's the ", i+1, " epoch."
         t_s = time.time()
@@ -164,14 +175,14 @@ def test(dictionary):
         return np.dot(sent_vec1, sent_vec2) / (len1 * len2)
     
     def count_num_lines():
-        wordfile = open("data/vec_100/question_word.test", 'r+')
+        wordfile = open("data/stop_word/question_word.test", 'r+')
         num_lines = sum(1 for line in wordfile)
         print "There are ", num_lines, "lines in test file."
         wordfile.close()
         return num_lines
 
     def test_on_batch(num_lines):
-        wordfile = open("data/vec_100/question_word.test", 'r+')
+        wordfile = open("data/stop_word/question_word.test", 'r+')
         current_lines = 0
         batch_size = 128
         lines = ""
@@ -218,11 +229,14 @@ def test(dictionary):
         # print "predict = ", predict
         return predict
 
-    def generate_answer(count, predict, choices, answer):
-        cos_similarity = -100000000
+    def generate_answer(predict, choices, answer):
+        cos_similarity = -1000000000
         answer_of_a_question = -1
         for i in range(5):
-            sim = similarity(choices[index][i], predict)
+            sim = similarity(choices[i], predict)
+            if i == 0:
+                cos_similarity = sim
+                answer_of_a_question = i
             if sim > cos_similarity:
                 cos_similarity = sim
                 answer_of_a_question = i
@@ -239,25 +253,39 @@ def test(dictionary):
     print "time cost = ", t_end - t_start
 
     # choices = np.asarray(IO.read_choices_vec('data/vec/choices_word.test.vec'))
-    choices_txt = lstmIO.read_choices_txt('data/vec_100/choices_word.test')
+    choices_txt = lstmIO.read_choices_txt('data/stop_word/choices_word.test')
+    # print "len of choices_txt =", len(choices_txt)
     # pick the answer among 5 choices
     print "Generating answer..."
     t_start = time.time()
     answer = []
     count = 0
+    choices_of_a_question = []
+    # time_b = time.time()
+    time_count = 0
     for i in range(len(choices_txt)):
         linevec = []
-        choices_of_a_question = []
-        for j in range(len(choices_txt[i])):
+        # print len(choices_txt[i])
+        time_begin = time.time()
+        for j in range(len(choices_txt[i]) - 1):
             word2vec(choices_txt[i][j], dictionary, linevec)
-        choices_of_a_question.append(np.sum(linevec, axis=0) / len(choices_txt[i]))
+            # value = dictionary.get(choices_txt[i][j])
+            # if (value != None):
+                # linevec.append(value)
+            # elif (len(choices_txt[i][j]) > 0):
+                # lstmIO.specialword(linevec, dictionary, choices_txt[i][j])
+        time_end = time.time()
+        time_count += (time_end - time_begin)
+        choices_of_a_question.append(np.sum(linevec, axis = 0) / (len(choices_txt[i]) - 1))
+        # print "choices_of_a_question after appending: ",choices_of_a_question
+        # print choices_of_a_question
         count += 1
         if count % 5 == 0:
-            choices_of_a_question = np.asarray(choices_of_a_question)
-            generate_answer(count, predict[count / 5], choices_of_a_question, answer)
+            # choices_of_a_question = np.asarray(choices_of_a_question)
+            generate_answer(predict[count / 5 - 1], choices_of_a_question, answer)
             choices_of_a_question = []
-        if count % 1000 == 0:
-            print len(answer)
+        if count % 25000 == 0:
+            print "Generating",len(answer),"lines..."
     t_end = time.time()
     print "time cost = ", t_end - t_start
 
