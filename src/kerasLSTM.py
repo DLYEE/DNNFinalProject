@@ -62,7 +62,7 @@ def make_batch(lines, dictionary):
     wordvec = np.empty([len(line), max_len, 300])
     for index in range(len(line)):
         linevec = np.asarray(wordvec_list[index])
-        linevec = np.vstack((np.zeros((max_len - np.size(linevec,0),300)),linevec))
+        linevec = np.vstack((np.random.randn(max_len - np.size(linevec,0),300),linevec))
         wordvec[index] = linevec
     return wordvec
 
@@ -123,12 +123,13 @@ def train(dictionary):
     
     # trainKeyOrder = IO.read_qid('data/final_project_pack/question.train')
     # x_train = np.asarray(IO.read_question_vec('data/vec/question_word.train.vec'))
-    LR = 2E-3
+    LR = 3E-3
+    Decay = 1E-4
     print "learning rate = ", LR
     # sgd = SGD(lr=LR, decay=0, momentum=0.9, nesterov=True)
     # ada = Adagrad(lr=0.01, epsilon=1e-06)
-    rms = RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
-    model.compile(loss=cost_function, optimizer=rms)
+    rms = RMSprop(lr = LR, rho=0.9, epsilon=1e-06, decay = Decay)
+    model.compile(loss = cost_function, optimizer=rms)
 
     print "Training begins..."
     t_start = time.time()
@@ -144,7 +145,7 @@ def train(dictionary):
     
     # train in batches
     num_lines = count_num_lines()
-    num_epoch = 2
+    num_epoch = 3
     for i in range(num_epoch):
         print "It's the ", i+1, " epoch."
         t_s = time.time()
@@ -256,11 +257,11 @@ def test(dictionary):
         linevec = []
         # print len(choices_txt[i])
         time_begin = time.time()
-        for j in range(len(choices_txt[i]) - 1):
+        for j in range(len(choices_txt[i])):
             word2vec(choices_txt[i][j], dictionary, linevec)
         time_end = time.time()
         time_count += (time_end - time_begin)
-        choices_of_a_question.append(np.sum(linevec, axis = 0) / (len(choices_txt[i]) - 1))
+        choices_of_a_question.append(np.sum(linevec, axis = 0) / (len(choices_txt[i])))
         count += 1
         if count % 5 == 0:
             # choices_of_a_question = np.asarray(choices_of_a_question)

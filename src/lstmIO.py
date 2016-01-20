@@ -77,6 +77,7 @@ def read_answer_txt(file):
         answer_txt = []
         for line in answers_file:
             answer_info = re.split(" |\n", line)
+            answer_info.pop()
             answer_txt.append(answer_info)
     t_end = time.time()
     print "time cost = ", t_end - t_start
@@ -89,6 +90,7 @@ def read_choices_txt(file):
         choices_txt = []
         for line in choices_file:
             choices_info = re.split(" |\n", line)
+            choices_info.pop()
             choices_txt.append(choices_info)
     t_end = time.time()
     print "time cost = ", t_end - t_start
