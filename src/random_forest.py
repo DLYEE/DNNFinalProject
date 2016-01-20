@@ -35,6 +35,33 @@ def y_label_generate(answer_file):
     return y
 
 
+def y_write_file(pre_file, predict_file, y):
+    
+    # generate label y from answer_file
+    
+    predict = []
+    with open(pre_file,'r+') as file:
+        for line in file:
+            predict.append(line)
+
+    with open(predict_file,'w') as file:
+        file.write(predict[0])
+        for index in range(len(y)):
+            ans = ''
+            if y[index] == 0:
+                ans = 'A'
+            elif y[index] == 1:
+                ans = 'B'
+            elif y[index] == 2:
+                ans = 'C'
+            elif y[index] == 3:
+                ans = 'D'
+            elif y[index] == 4:
+                ans = 'E'
+            ans = predict[index+1][:8] + ans + '\n'
+            file.write(ans)
+
+
 def x_feature_generate(question, choice, dictionary):
     
     # generate training feature
@@ -159,4 +186,5 @@ ct_lines = open('data/vec/choices_word.test', 'r+').read()
 Xt = x_feature_generate(qt_lines, ct_lines, dictionary)
 Yt = clf.predict(Xt)
 # write file not done
-print Yt
+#print Yt
+y_write_file('predict.csv','rfp.csv',Yt)
